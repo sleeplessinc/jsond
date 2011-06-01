@@ -28,8 +28,8 @@ exports.createServer = function(msgHandler) {
 			req.on("end", function() {
 				try {
 					var msgIn = JSON.parse(jsonIn)
-					msgHandler(jsonIn, function(msg) {
-						var jsonOut = JSON.stringify(msg)
+					msgHandler(msgIn, function(msgOut) {
+						var jsonOut = JSON.stringify(msgOut)
 						res.writeHead(200, {
 							"Content-Type": "text/plain",
 							"Content-Length": jsonOut.length,
