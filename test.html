@@ -1,0 +1,21 @@
+<html>
+<body>
+
+Send: <input onchange="changed(this.value)"><p>
+Received: <textarea id=rcvd></textarea><p>
+
+<script>
+
+	function changed(v) {
+		var r = new XMLHttpRequest();
+		r.open("POST", "http://127.0.0.1:3333/", true);
+		r.onreadystatechange = function() {
+			if(r.readyState == 4) {
+				document.getElementById("rcvd").value = JSON.parse(r.responseText).r
+				r.onreadystatechange = function() {}
+			}
+		}
+		r.send(JSON.stringify({m:v}));
+	}
+
+</script>
