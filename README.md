@@ -45,3 +45,13 @@ This is demonstrated below.
 
 	</script>
 
+
+## Notes
+
+The server only accepts POST method transactions.
+All other methods result in an HTTP 500 response.
+HTTP is used merely to provide a transport for the custom message protocol.
+Therefore, there is no need to support, or utilize any of the features of HTTP
+beyond just what is needed to move the messages back and forth.
+
+
