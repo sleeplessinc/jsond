@@ -3,6 +3,10 @@
 
 Implements a simple server for sending and receiving JSON messages over HTTP.
 
+## Dependencies
+
+Requires `git@github.com:sleeplessinc/node-msgd`
+
 
 ## Example Use Case
 
