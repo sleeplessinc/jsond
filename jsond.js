@@ -1,17 +1,24 @@
 
-var http = require("http")
+var msgd = require("msgd")
 
-var fail = function(res, err) {
-	var jsonOut = JSON.stringify({error:err.message+"\n"})
-	res.writeHead(500, {
-		"Content-Type": "text/plain",
-		"Content-Length": jsonOut.length,
-	})
-	res.end(jsonOut)
-}
+var o2j = function(o) { return JSON.stringify(o) }
+var j2o = function(j) { return JSON.parse(j) }
 
 exports.createServer = function(msgHandler) {
 
+	return msgd.createServer(function(jsonIn, cb) {
+		try {
+			var objIn = j2o(jsonIn)
+			msgHandler(objIn, function(objOut) {
+				cb(o2j(objOut))
+			})
+		}
+		catch(e) {
+			cb(o2j({error:e.message}))
+		}
+	})
+
+/*
 	return http.createServer(function(req, res) {
 		var jsonIn = ""
 		req.setEncoding("utf8")
@@ -43,5 +50,6 @@ exports.createServer = function(msgHandler) {
 			})
 		}
 	})
+*/
 }
 
