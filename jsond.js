@@ -22,98 +22,118 @@ IN THE SOFTWARE.
 
 */
 
-var o2j = function(o) { return JSON.stringify(o) }
+// ==================================================
+// json daemon (server code)
+// ==================================================
+
+var fs = require("fs"),
+	url = require("url"),
+	util = require("util"),
+	http = require("http")
+
+
+var log = console.log
+
 var j2o = function(j) { return JSON.parse(j) }
+var o2j = function(o) { return JSON.stringify(o) }
 
-try{ navigator
 
-	// ==================================================
-	// browser code
-	// ==================================================
-
-	(function(){
-		var doc = document,
-			loc = doc.location,
-			j = {}
-		j.nop = function(){}
-		j.proto = /^https?:$/.test(loc.protocol) || "http:"
-		j.host = loc.host || "127.0.0.1"
-		j.port = 3333
-		j.url = j.proto+"//"+j.host+":"+j.port+"/"
-		j.send = function(objOut, cb) {
-			var cb = cb || nop,
-				r = new XMLHttpRequest()
-			r.open("POST", j.url, true);
-			r.onreadystatechange = function() {
-				if(r.readyState == 4) {
-					try {
-						cb(j2o(r.responseText))
-					}
-					catch(e) {
-						cb({error:e.message})
-					}
-					r.onreadystatechange = nop
-				}
-			}
-			r.send(JSON.stringify(objOut));
-		}
-		json.connect = function(opts) {
-			for(k in opts) 
-				j[k] = opts[k]
-		}
-		jsond = j
-	})()
-
+var fail = function(res, err) {
+	var msg = o2j({error:err.message})
+	res.writeHead(500, {
+		"Content-Type": "text/plain",
+		"Content-Length": msg.length,
+	})
+	res.end(msg)
 }
-catch(e) {
 
-	// ==================================================
-	// server code
-	// ==================================================
-
-	var fail = function(res, err) {
-		var msg = o2j({error:err.message})
-		res.writeHead(500, {
-			"Content-Type": "text/plain",
-			"Content-Length": msg.length,
-		})
-		res.end(msg)
-	}
-
-	exports.createServer = function(msgHandler) {
-
-		return require("http").createServer(function(req, res) {
-			var jsonIn = ""
-			req.setEncoding("utf8")
-			if(req.method != "POST") {
-				fail(res, new Error("BAD METHOD: "+req.method))
-			}
-			else { 
-				req.on("data", function(d) {
-					jsonIn += d
-				})
-				req.on("error", function(e) {
-					fail(res, e)
-				})
-				req.on("end", function() {
-					try {
-						var objIn = j2o(jsonIn)
-						msgHandler(objIn, function(objOut) {
-							var jsonOut = o2j(objOut)
-							res.writeHead(200, {
-								"Content-Type": "text/plain",
-								"Content-Length": jsonOut.length,
-							})
-							res.end(jsonOut)
-						})
-					}
-					catch(e) {
-						fail(res, e)
-					}
-				})
-			}
-		})
-	}
-
+function r404(res) {
+	var msg = "FILE NOT FOUND"
+	res.writeHead(404, {
+		"Content-Type": "text/plain",
+		"Content-Length": msg.length,
+	})
+	res.end(msg)
 }
+
+
+var post = function(req, res) {
+	log("POST "+req.url)
+	var jsonIn = ""
+	req.setEncoding("utf8")
+	req.on("data", function(d) {
+		jsonIn += d
+	})
+	req.on("error", function(e) {
+		fail(res, e)
+	})
+	req.on("end", function() {
+		try {
+			var objIn = j2o(jsonIn)
+			msgHandler(objIn, function(objOut) {
+				var jsonOut = o2j(objOut)
+				res.writeHead(200, {
+					"Content-Type": "text/plain",
+					"Content-Length": jsonOut.length,
+				})
+				res.end(jsonOut)
+			})
+		}
+		catch(e) {
+			fail(res, e)
+		}
+	})
+}
+
+
+var isReadableFile = function(path) {
+	try {
+		if(fs.statSync(path).isFile()) {
+			fs.close(fs.openSync(path, "r"))
+			return true;
+		}
+	}
+	catch(e) { }
+	return false
+}
+
+var get = function(req, res) {
+	log("GET "+req.url)
+	var u = url.parse(req.url, true),
+		path = u.pathname
+	if(/\.\./.test(req.path)) {
+		r404(res)		// check for mischievous path
+	}
+	else {
+		if(path == "/")
+			path = "/index.html"
+		path = "docroot"+path
+		if(isReadableFile(path)) {
+			util.pump(fs.createReadStream(path), res, function(e) {
+				res.end("end")
+			})
+		}
+		else {
+			r404(res)
+		}
+	}
+}
+
+
+exports.createServer = function(msgHandler) {
+
+	return http.createServer(function(req, res) {
+		switch(req.method) {
+		case "POST":
+			post(req, res)
+			break
+		case "GET":
+			get(req, res)
+			break
+		default:
+			fail(res, new Error("BAD METHOD: "+req.method))
+		}
+	})
+}
+
 
