@@ -32,11 +32,10 @@ IN THE SOFTWARE.
 		j = {}
 	j.nop = function(){}
 	j.proto = loc.protocol
-	j.host = loc.hostname
-	j.port = 30303
+	j.port = 80
 	j.send = function(objOut, cb) {
 		var cb = cb || nop,
-			url = j.proto+"//"+j.host+":"+j.port+"/"
+			url = j.proto+"//"+loc.hostname+":"+j.port+"/"
 			r = new XMLHttpRequest()
 		r.open("POST", url, true);
 		r.onreadystatechange = function() {
