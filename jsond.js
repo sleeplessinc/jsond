@@ -85,7 +85,6 @@ var post = function(req, res) {
 	})
 }
 
-
 var isReadableFile = function(path) {
 	try {
 		if(fs.statSync(path).isFile()) {
@@ -112,12 +111,10 @@ var get = function(req, res) {
 			return
 		}
 	}
-	r404(res)		// check for mischievous path
+	r404(res)
 }
 
-
 exports.createServer = function(msgHandler) {
-
 	return http.createServer(function(req, res) {
 		switch(req.method) {
 		case "POST":
