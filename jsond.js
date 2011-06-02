@@ -26,68 +26,82 @@ var o2j = function(o) { return JSON.stringify(o) }
 var j2o = function(j) { return JSON.parse(j) }
 
 
-var fail = function(res, err) {
-	var msg = err.message+"\n"
-	res.writeHead(500, {
-		"Content-Type": "text/plain",
-		"Content-Length": msg.length,
-	})
-	res.end(msg)
-}
+if(navigator !== undefined) {
 
-exports.createServer = function(msgHandler) {
+	// client mode
+	// ==================================================
 
-	return require("http").createServer(function(req, res) {
-		var jsonIn = ""
-		req.setEncoding("utf8")
-		if(req.method != "POST") {
-			fail(res, new Error("BAD METHOD: "+req.method))
-		}
-		else { 
-			req.on("data", function(d) {
-				jsonIn += d
-			})
-			req.on("error", function(e) {
-				fail(res, e)
-			})
-			req.on("end", function() {
+	var nop = function(){}
+	var jsond = {}
+	jsond.send = function(objOut, cb) {
+		var cb = cb || nop,
+			doc = document,
+			loc = doc.location,
+			r = new XMLHttpRequest()
+		r.open("POST", loc.protocol+"//"+loc.hostname+":3333", true);
+		r.onreadystatechange = function() {
+			if(r.readyState == 4) {
 				try {
-					var objIn = j2o(jsonIn)
-					msgHandler(objIn, function(objOut) {
-						var jsonOut = o2j(objOut)
-						res.writeHead(200, {
-							"Content-Type": "text/plain",
-							"Content-Length": jsonOut.length,
-						})
-						res.end(jsonOut)
-					})
+					cb(j2o(r.responseText))
 				}
 				catch(e) {
-					fail(res, e)
+					cb({error:e.message})
 				}
-			})
+				r.onreadystatechange = nop
+			}
 		}
-	})
-}
-
-
-
-/*
-exports.createServer = function(msgHandler) {
-
-	return msgd.createServer(function(jsonIn, cb) {
-		try {
-			var objIn = j2o(jsonIn)
-			msgHandler(objIn, function(objOut) {
-				cb(o2j(objOut))
-			})
-		}
-		catch(e) {
-			cb(o2j({error:e.message}))
-		}
-	})
+		r.send(JSON.stringify({m:v}));
+	}
 
 }
-*/
+else {
 
+	// server mode
+	// ==================================================
+
+	var fail = function(res, err) {
+		var msg = err.message+"\n"
+		res.writeHead(500, {
+			"Content-Type": "text/plain",
+			"Content-Length": msg.length,
+		})
+		res.end(msg)
+	}
+
+	exports.createServer = function(msgHandler) {
+
+		return require("http").createServer(function(req, res) {
+			var jsonIn = ""
+			req.setEncoding("utf8")
+			if(req.method != "POST") {
+				fail(res, new Error("BAD METHOD: "+req.method))
+			}
+			else { 
+				req.on("data", function(d) {
+					jsonIn += d
+				})
+				req.on("error", function(e) {
+					fail(res, e)
+				})
+				req.on("end", function() {
+					try {
+						var objIn = j2o(jsonIn)
+						msgHandler(objIn, function(objOut) {
+							var jsonOut = o2j(objOut)
+							res.writeHead(200, {
+								"Content-Type": "text/plain",
+								"Content-Length": jsonOut.length,
+							})
+							res.end(jsonOut)
+						})
+					}
+					catch(e) {
+						fail(res, e)
+					}
+				})
+			}
+		})
+	}
+
+}
 
