@@ -5,4 +5,5 @@
 ,"license":{"type":"MIT" ,"url":"https://github.com/sleeplessinc/node-jsond/raw/master/LICENSE"}
 ,"main":"jsond.js"
 ,"repositories":[{"type":"git","url":"https://sleeplessinc@github.com/sleeplessinc/node-jsond.git"}]
+,"engines":"0.4.0"
 }
