@@ -31,30 +31,38 @@ try{ navigator
 	// browser code
 	// ==================================================
 
-	var nop = function(){}
-	var jsond = {}
-	jsond.send = function(objOut, cb) {
-		var cb = cb || nop,
-			doc = document,
+	(function(){
+		var doc = document,
 			loc = doc.location,
-			host = doc.location.host || "127.0.0.1",
-			r = new XMLHttpRequest(),
-			proto = /^https?:$/.test(loc.protocol) || "http:"
-			url = proto+"//"+host+":3333/"
-		r.open("POST", url, true);
-		r.onreadystatechange = function() {
-			if(r.readyState == 4) {
-				try {
-					cb(j2o(r.responseText))
+			j = {}
+		j.nop = function(){}
+		j.proto = /^https?:$/.test(loc.protocol) || "http:"
+		j.host = loc.host || "127.0.0.1"
+		j.port = 3333
+		j.url = j.proto+"//"+j.host+":"+j.port+"/"
+		j.send = function(objOut, cb) {
+			var cb = cb || nop,
+				r = new XMLHttpRequest()
+			r.open("POST", j.url, true);
+			r.onreadystatechange = function() {
+				if(r.readyState == 4) {
+					try {
+						cb(j2o(r.responseText))
+					}
+					catch(e) {
+						cb({error:e.message})
+					}
+					r.onreadystatechange = nop
 				}
-				catch(e) {
-					cb({error:e.message})
-				}
-				r.onreadystatechange = nop
 			}
+			r.send(JSON.stringify(objOut));
 		}
-		r.send(JSON.stringify(objOut));
-	}
+		json.connect = function(opts) {
+			for(k in opts) 
+				j[k] = opts[k]
+		}
+		jsond = j
+	})()
 
 }
 catch(e) {

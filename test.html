@@ -7,11 +7,13 @@ Received: <textarea id=rcvd></textarea><p>
 <script src=jsond.js></script>
 
 <script>
+	
+	var rcvd = document.getElementById("rcvd")
 
 	function changed(v) {
-		jsond.send({m:v}, function(o) {
-			doc = document,
-			doc.getElementById("rcvd").value = o2j(o);
+		var msg = {m:v}
+		jsond.send(msg, function(response) {
+			rcvd.value = "Response: "+o2j(response);
 		})
 	}
 
