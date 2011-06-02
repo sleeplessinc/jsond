@@ -25,10 +25,10 @@ IN THE SOFTWARE.
 var o2j = function(o) { return JSON.stringify(o) }
 var j2o = function(j) { return JSON.parse(j) }
 
+try{ navigator
 
-if(navigator !== undefined) {
-
-	// client mode
+	// ==================================================
+	// browser code
 	// ==================================================
 
 	var nop = function(){}
@@ -37,8 +37,11 @@ if(navigator !== undefined) {
 		var cb = cb || nop,
 			doc = document,
 			loc = doc.location,
-			r = new XMLHttpRequest()
-		r.open("POST", loc.protocol+"//"+loc.hostname+":3333", true);
+			host = doc.location.host || "127.0.0.1",
+			r = new XMLHttpRequest(),
+			proto = /^https?:$/.test(loc.protocol) || "http:"
+			url = proto+"//"+host+":3333/"
+		r.open("POST", url, true);
 		r.onreadystatechange = function() {
 			if(r.readyState == 4) {
 				try {
@@ -50,17 +53,18 @@ if(navigator !== undefined) {
 				r.onreadystatechange = nop
 			}
 		}
-		r.send(JSON.stringify({m:v}));
+		r.send(JSON.stringify(objOut));
 	}
 
 }
-else {
+catch(e) {
 
-	// server mode
+	// ==================================================
+	// server code
 	// ==================================================
 
 	var fail = function(res, err) {
-		var msg = err.message+"\n"
+		var msg = o2j({error:err.message})
 		res.writeHead(500, {
 			"Content-Type": "text/plain",
 			"Content-Length": msg.length,

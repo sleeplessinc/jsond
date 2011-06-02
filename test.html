@@ -11,7 +11,7 @@ Received: <textarea id=rcvd></textarea><p>
 	function changed(v) {
 		jsond.send({m:v}, function(o) {
 			doc = document,
-			doc.getElementById("rcvd").value = o;
+			doc.getElementById("rcvd").value = o2j(o);
 		})
 	}
 
