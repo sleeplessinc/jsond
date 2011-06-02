@@ -23,7 +23,7 @@ IN THE SOFTWARE.
 */
 
 // ==================================================
-// json client (browser) code
+// client (browser) code
 // ==================================================
 
 (function() {
@@ -40,18 +40,19 @@ IN THE SOFTWARE.
 			r = new XMLHttpRequest()
 		r.open("POST", url, true);
 		r.onreadystatechange = function() {
-			if(r.readyState == 4) {
+			var json = r.responseText
+			if(r.readyState != 4)
+				return
+			if(json)
 				try {
-					cb(JSON.parse(r.responseText))
+					cb(JSON.parse(json))
 				}
 				catch(e) {
-					alert(url)
-					alert(r.responseText)
-					alert(JSON.stringify(e))
 					cb({error:e.message})
 				}
-				r.onreadystatechange = nop
-			}
+			else
+				cb({error:"no response"})
+			r.onreadystatechange = nop
 		}
 		r.send(JSON.stringify(objOut));
 	}

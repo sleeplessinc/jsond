@@ -32,8 +32,6 @@ var fs = require("fs"),
 	http = require("http")
 
 
-var log = console.log
-
 var j2o = function(j) { return JSON.parse(j) }
 var o2j = function(o) { return JSON.stringify(o) }
 
@@ -58,7 +56,6 @@ function r404(res) {
 
 
 var post = function(req, res, msgHandler) {
-	log("POST "+req.url)
 	var jsonIn = ""
 	req.setEncoding("utf8")
 	req.on("data", function(d) {
@@ -97,7 +94,6 @@ var isReadableFile = function(path) {
 }
 
 var get = function(req, res) {
-	log("GET "+req.url)
 	var u = url.parse(req.url, true),
 		path = u.pathname
 	if(!/\.\./.test(req.path)) {
