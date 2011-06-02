@@ -101,10 +101,7 @@ var get = function(req, res) {
 	log("GET "+req.url)
 	var u = url.parse(req.url, true),
 		path = u.pathname
-	if(/\.\./.test(req.path)) {
-		r404(res)		// check for mischievous path
-	}
-	else {
+	if(!/\.\./.test(req.path)) {
 		if(path == "/")
 			path = "/index.html"
 		path = "docroot"+path
@@ -112,11 +109,10 @@ var get = function(req, res) {
 			util.pump(fs.createReadStream(path), res, function(e) {
 				res.end("end")
 			})
-		}
-		else {
-			r404(res)
+			return
 		}
 	}
+	r404(res)		// check for mischievous path
 }
 
 
