@@ -26,25 +26,28 @@ IN THE SOFTWARE.
 // json client (browser) code
 // ==================================================
 
-(function(){
+(function() {
 	var doc = document,
 		loc = doc.location,
 		j = {}
 	j.nop = function(){}
-	j.proto = /^https?:$/.test(loc.protocol) || "http:"
-	j.host = loc.host || "127.0.0.1"
-	j.port = 3333
-	j.url = j.proto+"//"+j.host+":"+j.port+"/"
+	j.proto = loc.protocol
+	j.host = loc.hostname
+	j.port = 30303
 	j.send = function(objOut, cb) {
 		var cb = cb || nop,
+			url = j.proto+"//"+j.host+":"+j.port+"/"
 			r = new XMLHttpRequest()
-		r.open("POST", j.url, true);
+		r.open("POST", url, true);
 		r.onreadystatechange = function() {
 			if(r.readyState == 4) {
 				try {
 					cb(JSON.parse(r.responseText))
 				}
 				catch(e) {
+					alert(url)
+					alert(r.responseText)
+					alert(JSON.stringify(e))
 					cb({error:e.message})
 				}
 				r.onreadystatechange = nop
@@ -52,7 +55,7 @@ IN THE SOFTWARE.
 		}
 		r.send(JSON.stringify(objOut));
 	}
-	json.opts = function(opts) {
+	j.opts = function(opts) {
 		for(k in opts) 
 			j[k] = opts[k]
 	}

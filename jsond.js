@@ -57,7 +57,7 @@ function r404(res) {
 }
 
 
-var post = function(req, res) {
+var post = function(req, res, msgHandler) {
 	log("POST "+req.url)
 	var jsonIn = ""
 	req.setEncoding("utf8")
@@ -118,7 +118,7 @@ exports.createServer = function(msgHandler) {
 	return http.createServer(function(req, res) {
 		switch(req.method) {
 		case "POST":
-			post(req, res)
+			post(req, res, msgHandler)
 			break
 		case "GET":
 			get(req, res)
