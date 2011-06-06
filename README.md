@@ -1,5 +1,5 @@
 
-# node-jsond
+# jsond
 
 Implements a simple server for sending and receiving JSON messages over HTTP.
 
@@ -32,7 +32,7 @@ server using a custom protocol.
 
 	<html>
 	<body>
-	<h1>node-jsond test page</h1>
+	<h1>jsond test page</h1>
 
 	Send: <input onchange="changed(this.value)"><p>
 	Rcvd: <textarea id=rcvd></textarea><p>
