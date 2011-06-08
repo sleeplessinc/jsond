@@ -34,7 +34,7 @@ IN THE SOFTWARE.
 	j.proto = loc.protocol
 	j.port = 80
 	j.send = function(objOut, cb) {
-		var cb = cb || nop,
+		var cb = cb || j.nop,
 			url = j.proto+"//"+loc.hostname+":"+j.port+"/"
 			r = new XMLHttpRequest()
 		r.open("POST", url, true);
@@ -51,7 +51,7 @@ IN THE SOFTWARE.
 				}
 			else
 				cb({error:"no response"})
-			r.onreadystatechange = nop
+			r.onreadystatechange = j.nop
 		}
 		r.send(JSON.stringify(objOut));
 	}
