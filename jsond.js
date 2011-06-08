@@ -67,13 +67,15 @@ var post = function(req, res, msgHandler) {
 	req.on("end", function() {
 		try {
 			var objIn = j2o(jsonIn)
-			msgHandler(objIn, function(objOut) {
-				var jsonOut = o2j(objOut)
-				res.writeHead(200, {
-					"Content-Type": "text/plain",
-					"Content-Length": jsonOut.length,
-				})
-				res.end(jsonOut)
+			msgHandler(objIn, function(objOut, req, res) {
+				if(objOut) {
+					var jsonOut = o2j(objOut)
+					res.writeHead(200, {
+						"Content-Type": "text/plain",
+						"Content-Length": jsonOut.length,
+					})
+					res.end(jsonOut)
+				}
 			})
 		}
 		catch(e) {

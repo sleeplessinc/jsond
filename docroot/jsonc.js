@@ -22,10 +22,6 @@ IN THE SOFTWARE.
 
 */
 
-// ==================================================
-// client (browser) code
-// ==================================================
-
 (function() {
 	var doc = document,
 		loc = doc.location,
