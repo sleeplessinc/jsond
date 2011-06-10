@@ -32,7 +32,7 @@ var fs = require("fs"),
 	http = require("http")
 
 
-var j2o = function(j) { return JSON.parse(j) }
+var j2o = function(j) { try { return JSON.parse(j) } catch(e) { return null } }
 var o2j = function(o) { return JSON.stringify(o) }
 
 
@@ -65,9 +65,12 @@ var post = function(req, res, msgHandler) {
 		fail(res, e)
 	})
 	req.on("end", function() {
-		try {
-			var objIn = j2o(jsonIn)
-			msgHandler(objIn, function(objOut, req, res) {
+		var objIn = j2o(jsonIn)
+		if(!objIn) {
+			fail(res, "syntax error")
+		}
+		else {
+			msgHandler(objIn, function(objOut) {
 				if(objOut) {
 					var jsonOut = o2j(objOut)
 					res.writeHead(200, {
@@ -76,10 +79,7 @@ var post = function(req, res, msgHandler) {
 					})
 					res.end(jsonOut)
 				}
-			})
-		}
-		catch(e) {
-			fail(res, e)
+			}, req, res)
 		}
 	})
 }
