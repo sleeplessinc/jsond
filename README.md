@@ -4,56 +4,37 @@
 Implements a simple server for sending and receiving JSON messages over HTTP.
 
 
-## Example Use Case
+In the browser page:
 
-An example use case would be a web page using AJAX calls to send msgs to a
-server using a custom protocol.
-
-### Starting a msg handling server 
-
-	var jsond = require("./jsond")
-
-	var log = console.log
-
-	function msgHandler(msg, cb) {
-		log("incoming msg: "+JSON.stringify(msg));
-		msg = {r:"You said: "+msg.m}
-		log("sending response: "+JSON.stringify(msg));
-		cb(msg)
-	}
-
-	jsond.createServer(msgHandler).listen(30304)
-
-	log("listening");
-
-
-
-### Sending msgs to the server from the browser
-
-	<html>
-	<body>
-	<h1>jsond test page</h1>
-
-	Send: <input onchange="changed(this.value)"><p>
-	Rcvd: <textarea id=rcvd></textarea><p>
-
-	<script src=jsonc.js></script>
-
+	<input onchange="send(this.value)">
 	<script>
-		
-		var rcvd = document.getElementById("rcvd")
-
-		jsond.opts({port: 30304})
-
-		function changed(v) {
-			var msg = {m:v}
-			jsond.send(msg, function(response) {
-				rcvd.value = "Response: "+JSON.stringify(response);
+		function send(val) {
+			var msgOut = {m:val}
+			alert("sending to server: "+msgOut.val)
+			jsond.send(msgOut, function(msgIn) {
+				alert("received from server: "+msgIn.r)
 			})
 		}
-
+		$(document).ready(function docReady() {
+			var d = document, e = d.createElement('script')
+			e.async = false
+			e.src = "http://localhost:50505/api/"
+			e.onload = function() {
+				alert("jsond is loaded and ready to use")
+			}
+			d.body.appendChild(e)
+		})
 	</script>
 
+
+Your server code:
+
+	var jsond = require("./jsond.js")
+
+	jsond.createServer(function(tx, msg, cb) {
+		msg = {r:"You said: "+msg.m}
+		cb(msg)
+	}).listen(50505)
 
 
 

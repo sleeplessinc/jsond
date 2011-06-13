@@ -27,7 +27,6 @@ var fs = require("fs"),
 	url = require("url"),
 	util = require("util"),
 	http = require("http"),
-	l = console.log
 	
 function j2o(j) { try { return JSON.parse(j) } catch(e) { return null } }
 function o2j(o) { return JSON.stringify(o) }
@@ -96,6 +95,7 @@ function streamOut(res, path) {
 	r500(res, "file not found")
 }
 
+
 function www(tx) {
 	var res = tx.res,
 		m = tx.req.method,
@@ -131,7 +131,7 @@ function api(tx, msgHandler) {
 	if(m == "GET") {
 		if(json) {
 			msgHandler(tx, j2o(json), function(msgOut) {
-				finish(res, o2j(msgOut)) // finish(res, "jsond.recv("+o2j(msgOut)+");\n")
+				finish(res, o2j(msgOut))
 			})
 		}
 		else {
@@ -148,8 +148,6 @@ exports.createServer = function(msgHandler) {
 	return http.createServer(function(req, res) {
 		var u = url.parse(req.url, true),
 			tx = { req:req, res:res, u:u }
-
-		l(req.method+" "+req.url)
 
 		if(req.method == "OPTIONS") {
 			res.writeHead(200, {
