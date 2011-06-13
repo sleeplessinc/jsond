@@ -1,16 +1,15 @@
 
-var jsond = require("./jsond")
+var jsond = require("./jsond.js"),
+	l = console.log
 
-var log = console.log
-
-function msgHandler(msg, cb) {
-	log("incoming msg: "+JSON.stringify(msg));
+function msgHandler(tx, msg, cb) {
+	l("incoming msg: "+JSON.stringify(msg));
 	msg = {r:"You said: "+msg.m}
-	log("sending response: "+JSON.stringify(msg));
+	l("sending response: "+JSON.stringify(msg));
 	cb(msg)
 }
 
-jsond.createServer(msgHandler).listen(30304)
+jsond.createServer(msgHandler).listen(50505)
 
-log("listening");
+l("listening");
 

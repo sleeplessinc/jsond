@@ -22,67 +22,28 @@ IN THE SOFTWARE.
 
 */
 
-// ==================================================
-// json daemon (server code)
-// ==================================================
 
 var fs = require("fs"),
 	url = require("url"),
 	util = require("util"),
-	http = require("http")
+	http = require("http"),
+	l = console.log
+	
+function j2o(j) { try { return JSON.parse(j) } catch(e) { return null } }
+function o2j(o) { return JSON.stringify(o) }
 
 
-var j2o = function(j) { try { return JSON.parse(j) } catch(e) { return null } }
-var o2j = function(o) { return JSON.stringify(o) }
-
-
-var fail = function(res, err) {
-	var msg = o2j({error:err.message})
+function r500(res, s) {
+	if(!s)
+		s = "ERROR"
 	res.writeHead(500, {
+		"Access-Control-Allow-Origin": "*",
 		"Content-Type": "text/plain",
-		"Content-Length": msg.length,
+		"Content-Length": s.length,
 	})
-	res.end(msg)
+	res.end(s)
 }
 
-function r404(res) {
-	var msg = "FILE NOT FOUND"
-	res.writeHead(404, {
-		"Content-Type": "text/plain",
-		"Content-Length": msg.length,
-	})
-	res.end(msg)
-}
-
-
-var post = function(req, res, msgHandler) {
-	var jsonIn = ""
-	req.setEncoding("utf8")
-	req.on("data", function(d) {
-		jsonIn += d
-	})
-	req.on("error", function(e) {
-		fail(res, e)
-	})
-	req.on("end", function() {
-		var objIn = j2o(jsonIn)
-		if(!objIn) {
-			fail(res, "syntax error")
-		}
-		else {
-			msgHandler(objIn, function(objOut) {
-				if(objOut) {
-					var jsonOut = o2j(objOut)
-					res.writeHead(200, {
-						"Content-Type": "text/plain",
-						"Content-Length": jsonOut.length,
-					})
-					res.end(jsonOut)
-				}
-			}, req, res)
-		}
-	})
-}
 
 var isReadableFile = function(path) {
 	try {
@@ -95,13 +56,36 @@ var isReadableFile = function(path) {
 	return false
 }
 
-var get = function(req, res) {
-	var u = url.parse(req.url, true),
-		path = u.pathname
-	if(!/\.\./.test(req.path)) {
-		if(path == "/")
-			path = "/index.html"
-		path = "docroot"+path
+
+function finish(res, s) {
+	res.writeHead(200, {
+		"Access-Control-Allow-Origin": "*",
+		"Content-Type": "text/plain",
+		"Content-Length": s.length,
+	})
+	res.end(s)
+}
+
+
+var readBody = function(req, res, cb) {
+	var body = ""
+
+	req.setEncoding("utf8")
+	req.on("data", function(d) {
+		body += d
+	})
+	req.on("error", function(e) {
+		r500(res, "error reading input")
+	})
+	req.on("end", function() {
+		cb(body)
+	})
+}
+
+
+function streamOut(res, path) {
+	path = "docroot"+path
+	if(!/\.\./.test(path)) {
 		if(isReadableFile(path)) {
 			util.pump(fs.createReadStream(path), res, function(e) {
 				res.end("end")
@@ -109,21 +93,76 @@ var get = function(req, res) {
 			return
 		}
 	}
-	r404(res)
+	r500(res, "file not found")
 }
+
+function www(tx) {
+	var res = tx.res,
+		m = tx.req.method,
+		u = tx.u,
+		path = u.pathname
+	
+	if(m == "GET") {
+		if(path == "/")
+			path = "/index.html"
+		streamOut(res, path)
+		return;
+	}
+
+	r500(res, "unsupported method: "+m)
+}
+
+
+function api(tx, msgHandler) {
+	var res = tx.res,
+		req = tx.req,
+		m = tx.req.method,
+		json = tx.u.query.j
+
+	if(m == "POST") {
+		readBody(req, res, function(json) {
+			msgHandler(tx, j2o(json), function(msgOut) {
+				finish(res, o2j(msgOut))
+			})
+		})
+		return
+	}
+
+	if(m == "GET") {
+		if(json) {
+			msgHandler(tx, j2o(json), function(msgOut) {
+				finish(res, o2j(msgOut)) // finish(res, "jsond.recv("+o2j(msgOut)+");\n")
+			})
+		}
+		else {
+			streamOut(res, "/api.js")
+		}
+		return
+	}
+
+	r500(res, "unsupported method: "+m)
+}
+
 
 exports.createServer = function(msgHandler) {
 	return http.createServer(function(req, res) {
-		switch(req.method) {
-		case "POST":
-			post(req, res, msgHandler)
-			break
-		case "GET":
-			get(req, res)
-			break
-		default:
-			fail(res, new Error("BAD METHOD: "+req.method))
+		var u = url.parse(req.url, true),
+			tx = { req:req, res:res, u:u }
+
+		l(req.method+" "+req.url)
+
+		if(req.method == "OPTIONS") {
+			res.writeHead(200, {
+				"Access-Control-Allow-Origin": "*",
+			})
 		}
+		else {
+			if(/^\/api\/?$/.test(u.pathname))
+				api(tx, msgHandler)
+			else
+				www(tx)
+		}
+
 	})
 }
 
