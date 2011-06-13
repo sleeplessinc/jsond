@@ -31,23 +31,12 @@ var fs = require("fs"),
 function j2o(j) { try { return JSON.parse(j) } catch(e) { return null } }
 function o2j(o) { return JSON.stringify(o) }
 
+
 exports.debug = true;
 var log = console.log
 function dbg(s) { if(exports.debug) log(s) }
 
 
-
-
-function r500(res, s) {
-	if(!s)
-		s = "ERROR"
-	res.writeHead(500, {
-		"Access-Control-Allow-Origin": "*",
-		"Content-Type": "text/plain",
-		"Content-Length": s.length,
-	})
-	res.end(s)
-}
 
 
 var isReadableFile = function(path) {
@@ -62,13 +51,21 @@ var isReadableFile = function(path) {
 }
 
 
-function finish(res, s) {
-	res.writeHead(200, {
+function finish(res, s, rc) {
+	res.writeHead(rc || 200, {
 		"Access-Control-Allow-Origin": "*",
+		"Access-Control-Max-Age": "0",
 		"Content-Type": "text/plain",
-		"Content-Length": s.length,
+		"Content-Length": ""+s.length,
 	})
 	res.end(s)
+}
+
+
+function r500(res, s) {
+	if(!s)
+		s = "ERROR"
+	finish(res, s || "ERROR", 500)
 }
 
 
@@ -151,16 +148,13 @@ function api(tx, msgHandler) {
 
 
 exports.createServer = function(msgHandler) {
-	dbg("debug="+exports.debug)
 	return http.createServer(function(req, res) {
 		var u = url.parse(req.url, true),
 			tx = { req:req, res:res, u:u }
 
 		dbg(req.method+" "+req.url)
 		if(req.method == "OPTIONS") {
-			res.writeHead(200, {
-				"Access-Control-Allow-Origin": "*",
-			})
+			finish(res, "")
 		}
 		else {
 			if(/^\/api\/?$/.test(u.pathname))
