@@ -26,7 +26,7 @@ IN THE SOFTWARE.
 var fs = require("fs"),
 	url = require("url"),
 	util = require("util"),
-	http = require("http"),
+	http = require("http")
 	
 function j2o(j) { try { return JSON.parse(j) } catch(e) { return null } }
 function o2j(o) { return JSON.stringify(o) }
