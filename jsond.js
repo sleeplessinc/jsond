@@ -85,6 +85,20 @@ var readBody = function(req, res, cb) {
 }
 
 
+function streamIn(req, res, path) {
+	path = "docroot"+path
+	if(!/\.\./.test(path)) {
+		util.pump(req, fs.createWriteStream(path), function(e) {
+			if(e) 
+				r500(res)
+			else
+				finish(res, "")
+		})
+		return
+	}
+	r500(res)
+}
+
 function streamOut(res, path) {
 	path = "docroot"+path
 	if(!/\.\./.test(path)) {
@@ -101,6 +115,7 @@ function streamOut(res, path) {
 
 function www(tx) {
 	var res = tx.res,
+		req = tx.req,
 		m = tx.req.method,
 		u = tx.u,
 		path = u.pathname
@@ -110,6 +125,12 @@ function www(tx) {
 			path = "/index.html"
 		streamOut(res, path)
 		return;
+	}
+
+	if(m == "PUT") {
+		// xxx some security here might be nice.
+		streamIn(req, res, path)
+		return
 	}
 
 	r500(res, "unsupported method: "+m)
