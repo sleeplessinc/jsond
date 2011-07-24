@@ -55,6 +55,7 @@ function finish(res, s, rc) {
 	res.writeHead(rc || 200, {
 		"Access-Control-Allow-Origin": "*",
 		"Access-Control-Max-Age": "0",
+		"Cache-Control": "no-cache",
 		"Content-Type": "text/plain",
 		"Content-Length": ""+s.length,
 	})
@@ -86,13 +87,23 @@ var readBody = function(req, res, cb) {
 
 
 function streamIn(req, res, path) {
-	path = "docroot"+path
+	fs.mkdirSync("files", 0777)
+	path = "files"+path
 	if(!/\.\./.test(path)) {
-		util.pump(req, fs.createWriteStream(path), function(e) {
-			if(e) 
-				r500(res)
-			else
-				finish(res, "")
+		req.on("error", function() {
+			dbg("streamIn: error")
+			finish(res, "ouch")
+		})
+		// xxx make this stream
+		readBody(req, res, function(data) {
+			dbg("got body: "+data.length)
+			fs.writeFile(path, data, function(e) {
+				dbg("wrote file: "+e)
+				if(e)
+					r500(res)
+				else
+					finish(res, "ok")
+			})
 		})
 		return
 	}
@@ -100,11 +111,18 @@ function streamIn(req, res, path) {
 }
 
 function streamOut(res, path) {
+	var rs = null
+
 	path = "docroot"+path
 	if(!/\.\./.test(path)) {
 		if(isReadableFile(path)) {
-			util.pump(fs.createReadStream(path), res, function(e) {
-				res.end("end")
+			rs = fs.createReadStream(path)
+			util.pump(rs, res, function(e) {
+				dbg("streamOut: pump done: "+e)
+				if(e) 
+					r500(res)
+				else
+					finish(res, "")
 			})
 			return
 		}
@@ -128,6 +146,12 @@ function www(tx) {
 	}
 
 	if(m == "PUT") {
+		// xxx some security here might be nice.
+		streamIn(req, res, path)
+		return
+	}
+
+	if(m == "POST") {
 		// xxx some security here might be nice.
 		streamIn(req, res, path)
 		return
