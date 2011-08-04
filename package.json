@@ -1,21 +1,17 @@
 {
   "name": "jsond",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Implements a simple server for sending and receiving JSON messages over HTTP",
   "author": "Joe Hitchens <joe@sleepless.com> (sleepless.com)",
   "license": {
     "type": "MIT",
     "url": "https://github.com/sleeplessinc/jsond/raw/master/LICENSE"
   },
-  "main": "jsond",
   "repositories": [
     {
       "type": "git",
       "url": "https://sleeplessinc@github.com/sleeplessinc/jsond.git"
     }
   ],
-  "engines": {
-    "node": "0.4.0"
-  },
   "repository": "git://github.com/sleeplessinc/jsond.git"
 }
