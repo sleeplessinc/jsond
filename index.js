@@ -26,7 +26,6 @@ var url = require("url"),
 	http = require("http"),
 	log = require("log5")
 
-logLevel = 5
 
 var j2o = function(j) { try { return JSON.parse(j) } catch(e) { return null } }
 var o2j = function(o) { return JSON.stringify(o) }
@@ -61,7 +60,7 @@ function messageStart(tx, json) {
 	if(!msg) 
 		return fail(tx, "bad message")
 
-	tx.cb(tx, msg, messageEnd)
+	tx.cb(msg, function(msgOut) { messageEnd(tx, msgOut) }, tx)
 }
 
 

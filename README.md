@@ -3,6 +3,7 @@
 
 Implements a simple server for sending and receiving JSON messages over HTTP.
 
+## Example
 
 In the browser page:
 
@@ -31,10 +32,30 @@ Your server code:
 
 	var jsond = require("./jsond.js")
 
-	jsond.createServer(function(tx, msg, cb) {
+	jsond.createServer(function(msg, cb) {
 		msg = {r:"You said: "+msg.m}
 		cb(msg)
 	}).listen(50505)
+
+
+## Notes
+
+Any request coming into the server for a path that starts with "/api" is treated as 
+a message passing request.  A parameter named "j" is expected and must contain a JSON
+object. 
+
+Something like:
+
+	GET /api?j={"foo":"bar"} 
+
+Noting of course that the actual JSON text must be URI encoded.
+
+When this object is received and parsed, it is passed to the callback passed into
+createServer().  That callback receives it's own callback which should be used to
+send a message back to the client.
+
+Any requests for paths that do not beging with "/api" are process as static file 
+requests and are handled by the node module "paperboy".
 
 
 
