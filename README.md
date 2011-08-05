@@ -55,7 +55,8 @@ createServer().  That callback receives it's own callback which should be used t
 send a message back to the client.
 
 Any requests for paths that do not beging with "/api" are process as static file 
-requests and are handled by the node module "paperboy".
+requests and are handled by the node module "paperboy".  The static files are
+expected to be rooted at a directory or symlink called "./docroot".
 
 
 
