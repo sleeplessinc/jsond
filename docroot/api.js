@@ -40,11 +40,6 @@ IN THE SOFTWARE.
 			url = j.root,
 			r = new XMLHttpRequest()
 
-		alert("msg = "+j.o2j(objOut))
-		//alert("page came from "+document.location)
-		//alert("api.js came form "+j.root)
-
-
 		url = j.root+"?j="+encodeURIComponent(JSON.stringify(objOut))
 
 		r.open("GET", url, true);
@@ -63,7 +58,7 @@ IN THE SOFTWARE.
 				cb({error:"no response"})
 			r.onreadystatechange = nop
 		}
-		r.send() //JSON.stringify(objOut));
+		r.send()
 	}
 
 	jsond = j
