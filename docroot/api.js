@@ -24,11 +24,12 @@ IN THE SOFTWARE.
 (function() {
 
 	var j = {},
-		nop = function() {}
+		nop = function() {},
 	
 	j.j2o = function(j) { try { return JSON.parse(j) } catch(e) { return null } }
 	j.o2j = function(o) { return JSON.stringify(o) }
 
+	j.seq = 1;
 	j.root = document.getElementById("jsond").src	// where this script was loaded from
 	j.cross = /^http/.test(j.root.toLowerCase())	// cross domain?	// xxx make smarter
 
@@ -40,6 +41,7 @@ IN THE SOFTWARE.
 			url = j.root,
 			r = new XMLHttpRequest()
 
+		objOut.seq = j.seq++;
 		url = j.root+"?j="+encodeURIComponent(JSON.stringify(objOut))
 
 		r.open("GET", url, true);
