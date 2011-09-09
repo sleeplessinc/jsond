@@ -25,6 +25,9 @@ IN THE SOFTWARE.
 var url = require("url"),
 	http = require("http"),
 	log = require("log5").mkLog()
+	
+	
+exports.log = log
 
 
 var j2o = function(j) { try { return JSON.parse(j) } catch(e) { return null } }
