@@ -24,7 +24,7 @@ IN THE SOFTWARE.
 (function() {
 
 	var j = {},
-		nop = function() {},
+		nop = function() {}
 	
 	j.j2o = function(j) { try { return JSON.parse(j) } catch(e) { return null } }
 	j.o2j = function(o) { return JSON.stringify(o) }

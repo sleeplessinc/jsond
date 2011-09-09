@@ -24,7 +24,7 @@ IN THE SOFTWARE.
 
 var url = require("url"),
 	http = require("http"),
-	log = require("log5")
+	log = require("log5").mkLog()
 
 
 var j2o = function(j) { try { return JSON.parse(j) } catch(e) { return null } }
@@ -38,7 +38,7 @@ var nop = function(){}
 function messageEnd(tx, msgOut) {
 	var json = o2j(msgOut)
 
-	log3("<<< "+json)
+	log(3, "<<< "+json)
 
 	tx.res.writeHead(200, {
 		"Cache-Control": "no-cache",
@@ -53,7 +53,7 @@ function messageEnd(tx, msgOut) {
 function messageStart(tx, json) {
 	var msg = j2o(json)
 
-	log3(">>> "+json)
+	log(3, ">>> "+json)
 
 	tx.json = json
 	tx.msg = msg
@@ -68,7 +68,7 @@ function fail(tx, why) {
 	var rc = 500
 
 	why = why || "mystery"
-	log3("FAIL: "+why)
+	log(3, "FAIL: "+why)
 	s = "ERROR "+rc
 	tx.res.writeHead(rc, {
 		"Content-Type": "text/plain",
@@ -120,7 +120,7 @@ function www(req, res, docroot) {
 		.before(function() {
 		})
 		.after(function() {
-			log3("PB OK "+req.method+req.url)
+			log(3, "PB OK "+req.method+req.url)
 		})
 		.error(function() {
 			wwwErr(req, res, 500) 
@@ -132,7 +132,7 @@ function www(req, res, docroot) {
 function wwwErr(req, res, r) {
 	res.writeHead(r, {'Content-Type': 'text/plain'})
 	res.end("Error "+r)
-	log3(r+" "+req.method+req.url)
+	log(3, r+" "+req.method+req.url)
 }
 
 
