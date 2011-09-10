@@ -24,7 +24,7 @@ IN THE SOFTWARE.
 
 var url = require("url"),
 	http = require("http"),
-	log = require("log5").mkLog()
+	log = require("log5").mkLog("jsond:")
 	
 	
 exports.log = log
