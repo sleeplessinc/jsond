@@ -1,6 +1,6 @@
 {
   "name": "jsond",
-  "version": "2.1.5",
+  "version": "2.2.0",
   "description": "Implements a simple server for sending and receiving JSON messages over HTTP",
   "author": "Joe Hitchens <joe@sleepless.com> (sleepless.com)",
   "license": {
