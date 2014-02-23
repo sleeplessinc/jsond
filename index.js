@@ -45,8 +45,8 @@ function messageEnd(tx, msgOut) {
 
 	tx.res.writeHead(200, {
 		"Cache-Control": "no-cache",
-		"Content-Type": "text/plain",
-		"Content-Length": ""+json.length,
+		"Content-Type": "application/json",
+		//"Content-Length": ""+json.length,		// XXX for some reason this doesn't work right
 	})
 
 	tx.res.end(json)
